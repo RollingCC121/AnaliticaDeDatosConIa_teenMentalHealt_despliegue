@@ -94,7 +94,7 @@ if st.button("🔮 Predecir", type="primary", use_container_width=True):
     X_new[art['numeric_cols']] = art['scaler'].transform(X_new[art['numeric_cols']])
 
     # 3) Predecir
-    proba = art['model'].predict_proba(X_new)[0, 1]
+    proba = float(art['model'].predict_proba(X_new)[0, 1])  # ← float nativo de Python (Streamlit no acepta np.float64)
     pred  = int(proba >= 0.5)
 
     # ---------- RESULTADO ----------
@@ -114,8 +114,8 @@ if st.button("🔮 Predecir", type="primary", use_container_width=True):
             "Si hay preocupaciones, hablar con un profesional siempre es válido."
         )
 
-    # Barra visual de la probabilidad
-    st.progress(np.clip(proba, 0.0, 1.0), text=f"Probabilidad de indicios: {pct:.1f}%")
+    # Barra visual de la probabilidad (clamp explícito a [0,1] con float nativo)
+    st.progress(max(0.0, min(proba, 1.0)), text=f"Probabilidad de indicios: {pct:.1f}%")
 
     with st.expander("Ver detalle de la predicción"):
         st.json({
